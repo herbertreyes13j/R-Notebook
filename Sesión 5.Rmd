@@ -1,0 +1,41 @@
+---
+title: "Sesión 5"
+output: html_document
+date: "2022-08-13"
+---
+
+Introduction to the tidyverse
+
+```{r cars}
+install.packages("gapminder")
+install.packages("dplyr")
+
+library("gapminder")
+library("dplyr")
+library("ggplot2")
+
+gapminder %>% filter(year==1957, country=="China")
+
+gapminder %>% arrange(lifeExp)
+
+gapminder %>% arrange(desc(lifeExp))
+
+gapminder %>% filter(year==1957) %>%  arrange(desc(pop))
+
+gapminder %>% mutate(lifeExp = 12*lifeExp)
+
+gapminder %>% filter(year==2007) %>% mutate(lifeExpMonths = 12*lifeExp) %>%  arrange(desc(lifeExpMonths))
+
+gapminder_1952 = gapminder %>% filter(year==1952)
+
+ggplot(gapminder_1952, aes(x=pop, y=gdpPercap)) + geom_point()
+
+ggplot(gapminder_1952, aes(x=pop, y=lifeExp)) + geom_point() + scale_x_log10()
+
+ggplot(gapminder_1952, aes(x=pop, y=lifeExp)) + geom_point() + scale_x_log10() + scale_y_log10()
+
+ggplot(gapminder_1952, aes(x=pop, y=lifeExp, color=continent)) + geom_point() + scale_x_log10()
+
+ggplot(gapminder_1952, aes(x=pop, y=lifeExp, color=continent, size=gdpPercap)) + geom_point() + scale_x_log10()
+```
+
