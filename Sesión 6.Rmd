@@ -3,37 +3,264 @@ title: "Sesión 6"
 output: html_document
 date: "2022-08-13"
 ---
+Grouping and summarizing 
 
-```{r cars}
+Sumarizing the meidian life expectancy
 
-gapminder %>% group_by(year) %>% 
-  summarize(medianLifeExp = median(lifeExp), maxGdpPercap = max(gdpPercap))
+```{r}
+library(gapminder)
+library(dplyr)
+gapminder %>%
+    summarize(medianLifeExp = median(lifeExp))
+#Filter for 1957 then summarize the median life expectancy
+gapminder %>%
+    filter(year ==1957) %>%
+    summarize(medianLifeExp = median(lifeExp))
+gapminder %>%
+    filter(year ==1957) %>%
+    summarize(medianLifeExp = median(lifeExp), maxGdpPercap = max(gdpPercap))
+```
 
-gapminder %>% filter(year==1957) %>% group_by(continent) %>%
-  summarize(medianLifeExp = median(lifeExp), maxGdpPercap = max(gdpPercap))
+Summarizing by year
 
-gapminder %>% group_by(continent,year) %>% 
-  summarize(medianLifeExp = median(lifeExp), maxGdpPercap = max(gdpPercap))
+```{r}
+gapminder %>%
+  group_by(year) %>%
+  summarize(medianLifeExp = median(lifeExp), maxGdpPercap=max(lifeExp))
+```
 
-by_year<- gapminder %>% group_by(year) %>% 
+Summarizing by continent
+```{r}
+gapminder %>%
+  filter(year == 1957) %>%
+  group_by(continent) %>%
+  summarize(medianLifeExp=median(lifeExp), maxGdpPercap=max(gdpPercap)) %>%
+  arrange(desc(maxGdpPercap))
+```
+
+Summarizing by continent and year
+
+```{r}
+gapminder %>%
+  group_by(continent,year) %>%
+  summarize(medianLifeExp=median(lifeExp), maxGdpPercap=max(gdpPercap))
+```
+
+Visualizing median life expectancy over time
+```{r}
+by_year <- gapminder %>%
+  group_by(year) %>%
+  summarize(medianGdpPercap= median(gdpPercap))
+by_year
+ggplot(by_year, aes(x=year, y =medianGdpPercap))+
+  geom_line()
+  
+```
+
+```{r}
+by_year_continent <- gapminder %>%
+  group_by(year, continent) %>%
+  summarize(medianGdpPercap=median(gdpPercap))
+by_year_continent
+ggplot(by_year_continent, aes(x=year,y=medianGdpPercap, color=continent))+
+  geom_line()
+```
+
+Bar Plot
+
+Visualizing median GDP per capita by continent
+
+```{r}
+by_continent <- gapminder %>%
+  filter(year==1952) %>%
+  group_by(continent) %>%
   summarize(medianGdpPercap = median(gdpPercap))
+  by_continent
+  
+  ggplot(by_continent, aes(x=continent,y=medianGdpPercap))+
+    geom_col()
+```
+Visualizing GDP per capita by country in Oceania
 
-ggplot(by_year, aes(x=year, y=medianGdpPercap)) + geom_line()
+```{r}
+oceania_1952 <- gapminder %>%
+  filter(continent=="Oceania", year==1952)
+  
+oceania_1952  
+ggplot(oceania_1952, aes(x=country, y=gdpPercap))+
+  geom_col()
+```
 
-by_year_continent <- gapminder %>% group_by(year,continent) %>% 
-  summarize(medianGdpPercap = median(gdpPercap))
+Histogram
 
-ggplot(by_year_continent, aes(x=year, y=medianGdpPercap, color=continent)) + geom_line()
+Visualizing population
 
-by_continent <- gapminder %>% 
-      filter(year==1952) %>% 
-      group_by(continent) %>% 
-      summarize(medianGdpPercap = median(gdpPercap))
+```{r}
+library(gapminder)
+library(ggplot2)
+library(dplyr)
+gapminder
+gapminder_1952 <- gapminder %>%
+  filter(year==1952) %>%
+  mutate(pop_by_mil = pop/1000000)
+gapminder_1952
+ggplot(gapminder_1952, aes(x=pop_by_mil))+
+  geom_histogram(bins=50)
+```
 
-ggplot(by_continent, aes(x=continent, y=medianGdpPercap)) + geom_col()
+Visualizing population with x-axis on a log scale
 
-oceania_1952 <- gapminder %>% filter(continent=="Oceania", year==1952)
+```{r}
+gapminder_1952 <- gapminder %>%
+  filter(year==1952)
+ggplot(gapminder_1952, aes(x=pop)) +
+  geom_histogram(bins=50) +
+  scale_x_log10()
+```
 
-ggplot(oceania_1952, aes(x=country, y=gdpPercap)) + geom_col()
 
+Boxplots
+
+Comparing GDP per capita across continents
+
+```{r}
+gapminder_1952 <- gapminder %>%
+  filter(year==1952)
+ggplot(gapminder_1952, aes(x=continent, y=gdpPercap))+
+  geom_boxplot()+
+  scale_y_log10()+
+  ggtitle("Comparing GDP per capita")
+```
+Reading csv
+
+```{r}
+library(tidyverse)
+counties <- read.csv('counties.csv')
+glimpse(counties)
+counties
+```
+
+select, filter, arrange
+
+```{r}
+counties %>%
+  select(state, county, population, men, women)
+counties_selected <- counties %>%
+  select(state, county, population, private_work, public_work, self_employed)
+counties_selected %>%
+  arrange(desc(public_work))
+counties_selected %>%
+  select(state, county, population)
+counties_selected %>%
+  filter(population>1000000)
+counties_selected <- counties %>%
+  select(state, county, population, private_work, public_work, self_employed)
+counties_selected %>%
+  filter(state="Texs", population>1000) %>%
+  arrange(desc(private_work))
+```
+
+
+Select, mutate, filter and arrange
+```{r}
+counties %>%
+  select(state, county, population, men, women) %>%
+  mutate(proportion_men = men/population) %>%
+  filter(popultion>10000) %>%
+  arrange(desc(proportion_men))
+```
+
+
+the verb count
+```{r}
+select_counties <- counties %>%
+    select(state, region, county, population, citizens) 
+counties %>%
+  count(region, sort = TRUE) %>%
+  arrange(desc(n))
+```
+Counting citizens by state
+
+```{r}
+counties_selected <-  counties %>%
+  select(county, region, state, population, citizens)
+counties_selected %>%
+  count(state,wt=citizens) %>% #El conteo lo hace por medio de citizens(wt) no por state, por state solo los agrupa
+  arrange(desc(n))
+```
+
+Mutating and counting
+
+```{r}
+counties_selected <-  counties %>%
+  select(county, region, state, population, walk)
+counties_selected %>%
+  mutate(population_walk=population*walk/100) %>%
+  count(state, wt=population_walk, sort=TRUE)
+```
+
+Summarizin
+
+```{r}
+counties_selected <- counties %>%
+  select(county, population, income, unemployment)
+counties_selected %>%
+  summarize(min_population=min(population), max_unemploment=max(unemployment), average_income=mean(income))
+```
+
+Summarizing by state
+
+```{r}
+counties_selected <- counties %>%
+  select(state,county, population, land_area)
+counties_selected %>%
+  group_by(state) %>%
+  summarize(total_area=sum(land_area),total_population=sum(population)) %>%
+  mutate(density=total_population/total_area) %>%
+  arrange(desc(density))
+counties_selected <- counties %>%
+  select(region,state,county, population)
+counties_selected %>%
+  group_by(region,state) %>%
+  summarize(total_pop=sum(population)) %>%
+  summarize(average_pop=mean(total_pop), median_pop=median(total_pop))
+```
+Top n verb
+
+```{r}
+counties_selected <- counties %>%
+  select(region,state,county,metro, population, walk)
+counties_selected %>%
+  group_by(region) %>%
+  top_n(1, walk)
+counties_selected <- counties %>%
+  select(region,state,county, population, income)
+counties_selected %>%
+  group_by(region,state) %>%
+  summarize(average_income = mean(income)) %>%
+  top_n(1, average_income)
+```
+
+```{r}
+counties_selected <- counties %>%
+  select(state,metro, population)
+counties_selected %>%
+  group_by(state, metro) %>%
+  summarize(total_pop=sum(population))%>%
+  top_n(1,total_pop) %>%
+  ungroup() %>%
+  count(metro)
+```
+
+Selectin g columns
+
+```{r}
+counties %>%
+  select(state,county,population, professional:production) %>%
+  arrange(desc(service))
+counties %>%
+  select(state,county,population, ends_with("work")) %>%
+  filter(public_work>=50)
+counties %>%
+  select(state,county,population, ends_with("at"))
 ```
