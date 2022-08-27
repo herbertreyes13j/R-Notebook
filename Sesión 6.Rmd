@@ -1,8 +1,3 @@
----
-title: "Sesión 6"
-output: html_document
-date: "2022-08-13"
----
 Grouping and summarizing 
 
 Sumarizing the meidian life expectancy
@@ -263,4 +258,39 @@ counties %>%
   filter(public_work>=50)
 counties %>%
   select(state,county,population, ends_with("at"))
+```
+
+Renaming a column after count
+
+```{r}
+counties %>%
+  count(state) %>%
+  rename(num_counties = n)
+counties %>%
+  select(state, county, poverty_rate = poverty)
+```
+
+Using transmute
+
+```{r}
+counties %>%
+  transmute(state, county, population, density=population/land_area) %>%
+  filter(population >= 1000000) %>%
+  arrange(desc(desntity))
+```
+
+Choosing among the four verbs
+```{r}
+#Change the name of the unempliyment  column
+counties %>%
+  rename(unemployment_rate=unemployment)
+#Keep the state and county columns, and the columns containing poverty
+counties %>%
+  select(state, county, contains("poverty"))
+#Calculate the fraction_name column without dropping the other columns
+counties %>%
+  mutate(fraction_name = women/population)
+#Keep only the state, county and employment_rate columns
+counties %>%
+  transmute(state, county, employment_rate = employed/population)
 ```
